@@ -19,28 +19,36 @@ shinyServer(function(input,output){
       addLayersControl(
         baseGroups = c("CartoDB.DarkMatter", "CartoDB.DarkMatterNoLabels","osm"),
         overlayGroups = "Markers",
-        options = layersControlOptions(collapsed = TRUE))
+        options = layersControlOptions(collapsed = TRUE))%>%
+      addEasyButton(easyButton(
+        icon="fa-crosshairs", title="Locate Me",
+        onClick=JS("function(btn, map){ map.locate({setView: true}); }")))
       
   })
   
   #Plot chart 
   output$plot1 <- renderPlotly({
     stats <- aggregate(data.frame(count = data$`Primary Type`), list(value = data$`Primary Type`), length)
-    plot_ly(x = stats[,2], y = reorder(stats[,1],stats[,2]), type = 'bar', orientation = 'h')%>%
+    plot_ly(x = stats[,2], y = reorder(stats[,1],stats[,2]), type = 'bar', orientation = 'h',marker=list(
+      color=seq(0, 39),
+      colorscale='Blues',
+      reversescale =F
+    ))%>%
       add_annotations(xref = 'x1', yref = 'y',
                       x = stats[,2] + 6,  y = stats[,1],
                       text = paste(round(stats[,2], 2)),
                       font = list(family = 'Arial', size = 12),
                       showarrow = FALSE)
   })
-  
-  #Plot chart 
+
+    #Plot chart 
   output$plot2 <- renderPlotly({
     stats1 <- data[data$Arrest == "True", ]
     stats1$Date <- format(stats1$Date, "%m/%Y")
     stats1 <- aggregate(data.frame(count = stats1$Arrest), list(value = stats1$Date), length)
     plot_ly(stats1, x = stats1[,1])%>%
-      add_lines(y = stats1[,2])%>%
+      add_lines(y = stats1[,2], name = "Offences", line = list(width = 3))%>%
+      add_lines(y = mean(stats1[,2]), name = "Average", line = list(color = 'grey'))%>%
       layout(xaxis = list(showgrid = F), yaxis = list(ticks='', showticklabels= F))
   })
   
@@ -66,6 +74,18 @@ shinyServer(function(input,output){
   output$txtout2 <- renderText({
     HTML("<center>",
     paste("12 months to","<b>", input$rangeslider[2], "</b>", "<br/>", "compared to", "<br/>", " the previous 12 months:"),"</center>"
+    )
+  })
+  
+  output$txtout3 <- renderText({
+    HTML("<center>",
+         paste("<b>", input$rangeslider[2], "</b>"),"</center>"
+    )
+  })
+  
+  output$txtout4 <- renderText({
+    HTML("<center>",
+         paste("<b>", input$rangeslider[2], "</b>"),"</center>"
     )
   })
   
