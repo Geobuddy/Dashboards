@@ -29,17 +29,17 @@ navbarPage("Crime Dashboard",
                         box(
                           sliderInput(inputId = "rangeslider", label = "Choose date range:", value = c(min(data$Date) + 60, max(data$Date) - 60), min = min(data$Date), max = max(data$Date), width = "100%")),
                         column(3,
-                                 box(title = h4(HTML("<center>","Crime Rate (per 1000 pop)","</center>")), width = "100%", background = "light-blue", status = "primary",
+                                 box(title = h5(HTML("<center>","Crime Rate (per 1000 pop)","</center>")), width = "100%", background = "light-blue", status = "primary",
                                      h4(htmlOutput("txtout4")))),
                         column(3,
-                                 box(title = h4(HTML("<center>","Crime count","</center>")), width = "100%", background = "light-blue", status = "primary",
+                                 box(title = h5(HTML("<center>","Crime count","</center>")), width = "100%", background = "light-blue", status = "primary",
                                      h4(htmlOutput("txtout3"))))
                       ),
                       fluidRow(
                         #Create map (Leaflet)
-                        box(leafletOutput(outputId = "map", height = 750, width = "100%")),
+                        box(leafletOutput(outputId = "map", height = "600", width = "100%")),
                         #Create charts (Plotly.Js)
-                        box(plotlyOutput(outputId = "plot1", height = 350, width = "100%")),
+                        box(plotlyOutput(outputId = "plot1", height = 300, width = "100%")),
                         box(plotlyOutput(outputId = "plot2", height = 250, width = "100%")),
                         column(3,
                             box(width = "100%", background = "light-blue", status = "primary",

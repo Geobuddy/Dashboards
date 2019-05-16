@@ -9,13 +9,13 @@ shinyServer(function(input,output){
   
   #Create the map
   output$map <- renderLeaflet({
+    data <- subset(data, Date >= input$rangeslider[1] & Date <= input$rangeslider[2])
     leaflet()%>%
       addProviderTiles("CartoDB.DarkMatter",group = "CartoDB.DarkMatter")%>%
       addTiles(group = "osm")%>%
       addProviderTiles("CartoDB.DarkMatterNoLabels", group = "CartoDB.DarkMatterNoLabels")%>%
+      addMarkers(data, lng = data$Longitude, lat = data$Latitude, group = "Markers") %>%
       #setView(lng = mean(data$Longitude), lat = mean(data$Latitude), zoom = 10)%>%
-      addMarkers(lng = data$Longitude, lat = data$Latitude,
-                 clusterOptions = markerClusterOptions(),group = "Markers")%>%
       addLayersControl(
         baseGroups = c("CartoDB.DarkMatter", "CartoDB.DarkMatterNoLabels","osm"),
         overlayGroups = "Markers",
@@ -23,32 +23,36 @@ shinyServer(function(input,output){
       addEasyButton(easyButton(
         icon="fa-crosshairs", title="Locate Me",
         onClick=JS("function(btn, map){ map.locate({setView: true}); }")))
-      
+    
+  })
+  
+  observeEvent(input$map_marker_click, {
+    leafletProxy("map")
   })
   
   #Plot chart 
   output$plot1 <- renderPlotly({
-    stats <- aggregate(data.frame(count = data$`Primary Type`), list(value = data$`Primary Type`), length)
-    plot_ly(x = stats[,2], y = reorder(stats[,1],stats[,2]), type = 'bar', orientation = 'h',marker=list(
+    data <- subset(data, Date >= input$rangeslider[1] & Date <= input$rangeslider[2])
+    data <- aggregate(data.frame(count = data$`Primary Type`), list(value = data$`Primary Type`), length)
+    plot_ly(x = data[,2], y = reorder(data[,1],data[,2]), type = 'bar', orientation = 'h',marker=list(
       color=seq(0, 39),
       colorscale='Blues',
       reversescale =F
     ))%>%
       add_annotations(xref = 'x1', yref = 'y',
-                      x = stats[,2] + 6,  y = stats[,1],
-                      text = paste(round(stats[,2], 2)),
+                      x = data[,2] + 6,  y = data[,1],
+                      text = paste(round(data[,2], 2)),
                       font = list(family = 'Arial', size = 12),
                       showarrow = FALSE)
   })
 
     #Plot chart 
   output$plot2 <- renderPlotly({
-    stats1 <- data[data$Arrest == "True", ]
-    stats1$Date <- format(stats1$Date, "%m/%Y")
-    stats1 <- aggregate(data.frame(count = stats1$Arrest), list(value = stats1$Date), length)
-    plot_ly(stats1, x = stats1[,1])%>%
-      add_lines(y = stats1[,2], name = "Offences", line = list(width = 3))%>%
-      add_lines(y = mean(stats1[,2]), name = "Average", line = list(color = 'grey'))%>%
+    data <- subset(data, Date >= input$rangeslider[1] & Date <= input$rangeslider[2] & Arrest == TRUE)
+    data <- aggregate(data.frame(count = data$Arrest), list(value = format.Date(data$Date,)), length)
+    plot_ly(data, x = data[,1])%>%
+      add_lines(y = data[,2], name = "Offences", line = list(width = 3))%>%
+      add_lines(y = mean(data[,2]), name = "Average", line = list(color = 'grey'))%>%
       layout(xaxis = list(showgrid = F), yaxis = list(ticks='', showticklabels= F))
   })
   
@@ -67,13 +71,13 @@ shinyServer(function(input,output){
   
   output$txtout1 <- renderText({
     HTML("<center>",
-    paste("<b>",input$rangeslider[2], "</b>", "<br/>" , "compared to", "<br/>", "previous month:"),"</center>"
+    paste("<b>",input$rangeslider[2], "</b>", "<br/>" , "compared to", "<br/>", "previous month:", "<br/>", "<br/>", "<b>", h4(input$rangeslider[2])), "<b/>","</center>"
     )
   })
   
   output$txtout2 <- renderText({
     HTML("<center>",
-    paste("12 months to","<b>", input$rangeslider[2], "</b>", "<br/>", "compared to", "<br/>", " the previous 12 months:"),"</center>"
+    paste("12 months to","<b>", input$rangeslider[2], "</b>", "<br/>", "compared to", "<br/>", " the previous 12 months:", "<br/>", "<br/>", "<b>", h4(input$rangeslider[2])), "<b/>","</center>"
     )
   })
   
