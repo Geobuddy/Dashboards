@@ -22,18 +22,19 @@ navbarPage("Crime Dashboard",
                     fluidPage(
                       fluidRow(
                         box(
-                          selectInput(inputId = "offence", label = "Offence Group", choices = data$`Primary Type`, width = "100%"),
-                          box(selectInput(inputId = "arrest", label = "Arrest", choices = data$Arrest, width = "100%")),
-                          box(selectInput(inputId = "domestic", label = "Domestic", choices = data$Domestic, width = "100%"))
+                          selectInput(inputId = "offence", label = "Offence Group", choices = unique(data$Primary.Type), width = "100%"),
+                          box(selectInput(inputId = "arrest", label = "Arrest", choices = data$Arrest, selected = TRUE,width = "100%")),
+                          box(selectInput(inputId = "domestic", label = "Domestic", choices = data$Domestic, selected = TRUE, width = "100%"))
                         ),
                         box(
-                          sliderInput(inputId = "rangeslider", label = "Choose date range:", value = c(min(data$Date) + 60, max(data$Date) - 60), min = min(data$Date), max = max(data$Date), width = "100%")),
+                          sliderInput(inputId = "rangeslider", label = "Choose date range:", value = c(min(data$Date), max(data$Date)),
+                                      min = min(data$Date), max = max(data$Date), width = "100%", timeFormat = "%b %Y")),
                         column(3,
                                  box(title = h5(HTML("<center>","Crime Rate (per 1000 pop)","</center>")), width = "100%", background = "light-blue", status = "primary",
-                                     h4(htmlOutput("txtout4")))),
+                                     h4(htmlOutput("txtout1")))),
                         column(3,
                                  box(title = h5(HTML("<center>","Crime count","</center>")), width = "100%", background = "light-blue", status = "primary",
-                                     h4(htmlOutput("txtout3"))))
+                                     h4(htmlOutput("txtout2"))))
                       ),
                       fluidRow(
                         #Create map (Leaflet)
@@ -43,10 +44,10 @@ navbarPage("Crime Dashboard",
                         box(plotlyOutput(outputId = "plot2", height = 250, width = "100%")),
                         column(3,
                             box(width = "100%", background = "light-blue", status = "primary",
-                                h5(htmlOutput("txtout1")))),
+                                h5(htmlOutput("txtout3")))),
                         column(3,
                                box(width = "100%", background = "navy", status = "primary",
-                                   h5(htmlOutput("txtout2"))))
+                                   h5(htmlOutput("txtout4"))))
                       ) 
                   ) 
            ),
